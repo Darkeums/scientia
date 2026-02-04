@@ -95,6 +95,23 @@ document.getElementById('addNode').onclick = async () => {
         refreshData();
     }
 };
+// Markdown Rendering Toggle
+let isPreview = false;
+document.getElementById('edit-toggle').onclick = () => {
+    isPreview = !isPreview;
+    const content = document.getElementById('node-content');
+    const preview = document.getElementById('node-preview');
+    if (isPreview) {
+        preview.innerHTML = marked.parse(content.value);
+        content.classList.add('hidden'); 
+        preview.classList.remove('hidden');
+        document.getElementById('edit-toggle').innerText = "✍️ Edit";
+    } else {
+        content.classList.remove('hidden'); 
+        preview.classList.add('hidden');
+        document.getElementById('edit-toggle').innerText = "👁 Preview";
+    }
+};
 
 document.getElementById('node-content').oninput = () => {
     clearTimeout(window.saveTimer);
