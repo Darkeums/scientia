@@ -1,63 +1,87 @@
 :root {
     --bg: #050508;
     --accent: #6366f1;
-    --accent-glow: rgba(99, 102, 241, 0.3);
-    --glass: rgba(255, 255, 255, 0.03);
+    --glass: rgba(255, 255, 255, 0.05);
     --border: rgba(255, 255, 255, 0.1);
 }
 
-/* Glassmorphism Effect for all UI elements */
-button, select, input, #sidebar, .auth-box {
-    backdrop-filter: blur(12px) saturate(150%);
-    -webkit-backdrop-filter: blur(12px) saturate(150%);
+/* Force the body to be the size of the screen */
+body, html { 
+    margin: 0; 
+    padding: 0;
+    background: var(--bg); 
+    color: white; 
+    font-family: 'Inter', sans-serif; 
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden; 
+}
+
+/* The Graph MUST be absolute/fixed to stay in the back */
+#graph {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+}
+
+/* The UI Layer MUST be fixed to float on top */
+#ui-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 30px;
+    pointer-events: none; /* Let clicks pass through to graph */
+}
+
+/* Enable clicks for actual buttons */
+header, .controls, .search-container { 
+    pointer-events: auto; 
+}
+
+/* STYLE REFINEMENT */
+h1 { 
+    letter-spacing: 5px; 
+    margin: 0; 
+    background: linear-gradient(to right, #fff, var(--accent));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+}
+
+button {
     background: var(--glass);
     border: 1px solid var(--border);
-}
-
-/* Header Text Glow */
-h1 {
-    background: linear-gradient(to bottom right, #fff, #6366f1);
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 10px var(--accent-glow));
-    letter-spacing: 6px;
-    font-size: 1.4rem;
-}
-
-/* Button "Juice" */
-button {
-    text-transform: uppercase;
-    font-weight: 700;
-    letter-spacing: 1px;
-    box-shadow: 0 4px 15px rgba(0,0,0,0.3);
-}
-
-button:hover {
-    transform: translateY(-2px);
-    border-color: var(--accent);
-    box-shadow: 0 0 20px var(--accent-glow);
-}
-
-.tab-btn.active {
-    background: linear-gradient(45deg, var(--accent), #a855f7);
-    border: none;
     color: white;
+    padding: 8px 15px;
+    border-radius: 8px;
+    backdrop-filter: blur(10px);
+    cursor: pointer;
+    font-weight: 600;
 }
 
-/* Sidebar Refinement */
+button:hover { background: var(--accent); }
+
+/* SIDEBAR FIX */
 #sidebar {
+    position: fixed;
+    right: 0;
+    top: 0;
+    width: 400px;
+    height: 100vh;
+    background: rgba(10, 10, 15, 0.9);
+    backdrop-filter: blur(30px);
     border-left: 1px solid var(--border);
-    box-shadow: -10px 0 30px rgba(0,0,0,0.5);
+    z-index: 1000;
+    padding: 40px;
+    transition: transform 0.4s ease;
+    display: flex;
+    flex-direction: column;
 }
 
-#node-title {
-    background: linear-gradient(to right, #fff, var(--text-dim));
-    background-clip: text;
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-}
+.sidebar-hidden { transform: translateX(100%); }
 
-/* Custom Scrollbar for the sidebar */
-#sidebar::-webkit-scrollbar { width: 4px; }
-#sidebar::-webkit-scrollbar-thumb { background: var(--border); border-radius: 10px; }
+.hidden { display: none !important; }
