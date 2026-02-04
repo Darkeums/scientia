@@ -1,63 +1,48 @@
 import { supabase } from './supabaseClient.js';
 
+// --- INITIALIZATION ---
 const Graph = ForceGraph()(document.getElementById('graph'));
-let nodes = [], links = [], activeNode = null, linkMode = false, sourceNode = null, currentWsId = null;
+let nodes = [], links = [], activeNode = null, linkMode = false, currentWsId = null;
 const categoryColors = { 'General': '#6366f1', 'CS': '#3b82f6', 'Math': '#ef4444', 'Personal': '#10b981' };
 
-// --- AUTH ---
+// --- AUTH & SESSION ---
+
 async function checkUser() {
-    // 1. Use getSession instead of getUser for faster/more reliable local check
+    console.log("Checking session...");
     const { data: { session } } = await supabase.auth.getSession();
     
     if (session?.user) {
         console.log("Session found for:", session.user.email);
-        document.getElementById('auth-overlay').classList.add('hidden');
-        
-        // 2. Ensure we load the workspace ONLY after we're sure we have a user
-        loadWorkspace("Personal"); 
+        // If we have a user, immediately try to load their personal workspace
+        await loadWorkspace("Personal"); 
     } else {
-        console.log("No active session.");
+        console.log("No active session. Showing login.");
         document.getElementById('auth-overlay').classList.remove('hidden');
     }
 }
-
-document.getElementById('login-btn').onclick = async () => {
-    const email = document.getElementById('email').value;
-    const password = document.getElementById('password').value;
-    
-    // Provide visual feedback
-    document.getElementById('auth-error').innerText = "Signing in...";
-    document.getElementById('auth-error').style.color = "white";
-
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    
-    if (error) {
-        document.getElementById('auth-error').innerText = error.message;
-        document.getElementById('auth-error').style.color = "#ef4444";
-    } else {
-        console.log("Login successful!");
-        // 3. Instead of just calling checkUser, let's trigger the UI change directly
-        document.getElementById('auth-overlay').classList.add('hidden');
-        await loadWorkspace("Personal");
-    }
-};
 
 // SIGN IN LOGIC
 document.getElementById('login-btn').onclick = async () => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
+    document.getElementById('auth-error').innerText = "Logging in...";
+
     const { error } = await supabase.auth.signInWithPassword({ email, password });
     
-    if (error) document.getElementById('auth-error').innerText = error.message;
-    else checkUser();
+    if (error) {
+        document.getElementById('auth-error').innerText = error.message;
+    } else {
+        console.log("Login success! Refreshing app state...");
+        window.location.reload(); // Best way to ensure clean state after login
+    }
 };
 
-// SIGN UP LOGIC (This was missing!)
+// SIGN UP LOGIC
 document.getElementById('signup-btn').onclick = async () => {
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
     
-    const { data, error } = await supabase.auth.signUp({ email, password });
+    const { error } = await supabase.auth.signUp({ email, password });
 
     if (error) {
         document.getElementById('auth-error').innerText = error.message;
@@ -66,6 +51,9 @@ document.getElementById('signup-btn').onclick = async () => {
         document.getElementById('auth-error').style.color = "#10b981"; 
     }
 };
+
+// --- WORKSPACE LOGIC ---
+
 async function loadWorkspace(name) {
     console.log("Loading workspace:", name);
     
@@ -73,17 +61,23 @@ async function loadWorkspace(name) {
         .from('workspaces')
         .select('id')
         .eq('name', name)
-        .maybeSingle(); 
-    
+        .maybeSingle(); // Prevents crashing if the row is temporarily missing
+
+    if (error) {
+        console.error("Workspace error:", error.message);
+        return;
+    }
+
     if (data) {
         currentWsId = data.id;
-        console.log("Success! Workspace ID:", currentWsId);
+        console.log("Success! Active Workspace ID:", currentWsId);
         
-        // --- ADD THIS LINE BELOW ---
+        // CRITICAL: Hide the login box once data is ready
         document.getElementById('auth-overlay').classList.add('hidden'); 
-        // ---------------------------
-
+        
         refreshData();
+    } else {
+        console.warn("Workspace not found. Check if row exists in DB and RLS is configured.");
     }
 }
 
@@ -95,7 +89,8 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     };
 });
 
-// --- GRAPH CONFIG ---
+// --- GRAPH CONFIGURATION ---
+
 Graph.backgroundColor('#050508')
     .nodeColor(n => categoryColors[n.category] || '#6366f1')
     .nodeCanvasObject((node, ctx, globalScale) => {
@@ -108,7 +103,7 @@ Graph.backgroundColor('#050508')
         ctx.textAlign = 'center'; ctx.fillStyle = 'white';
         ctx.fillText(node.name, node.x, node.y + 12);
     })
-    .onNodeClick(node => linkMode ? handleLinkSelection(node) : openSidebar(node));
+    .onNodeClick(node => openSidebar(node));
 
 async function refreshData() {
     if (!currentWsId) return;
@@ -119,7 +114,8 @@ async function refreshData() {
     Graph.graphData({ nodes, links });
 }
 
-// --- NODE ACTIONS ---
+// --- SIDEBAR & NODE ACTIONS ---
+
 async function openSidebar(node) {
     activeNode = node;
     document.getElementById('node-title').innerText = node.name;
@@ -136,7 +132,18 @@ document.getElementById('addNode').onclick = async () => {
         refreshData();
     }
 };
-// Markdown Rendering Toggle
+
+// AUTO-SAVE LOGIC
+document.getElementById('node-content').oninput = () => {
+    clearTimeout(window.saveTimer);
+    document.getElementById('save-status').innerText = "Typing...";
+    window.saveTimer = setTimeout(async () => {
+        await supabase.from('nodes').update({ content: document.getElementById('node-content').value }).eq('id', activeNode.id);
+        document.getElementById('save-status').innerText = "All changes saved";
+    }, 1000);
+};
+
+// MARKDOWN PREVIEW TOGGLE
 let isPreview = false;
 document.getElementById('edit-toggle').onclick = () => {
     isPreview = !isPreview;
@@ -154,14 +161,7 @@ document.getElementById('edit-toggle').onclick = () => {
     }
 };
 
-document.getElementById('node-content').oninput = () => {
-    clearTimeout(window.saveTimer);
-    window.saveTimer = setTimeout(async () => {
-        await supabase.from('nodes').update({ content: document.getElementById('node-content').value }).eq('id', activeNode.id);
-        document.getElementById('save-status').innerText = "Saved";
-    }, 1000);
-};
-
 document.getElementById('close-sidebar').onclick = () => document.getElementById('sidebar').classList.add('sidebar-hidden');
 
+// --- START APP ---
 checkUser();
