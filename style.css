@@ -4,28 +4,193 @@
     --glass: rgba(255, 255, 255, 0.05);
     --border: rgba(255, 255, 255, 0.1);
     --text-dim: #94a3b8;
+    --font-main: 'Inter', sans-serif;
+    --font-code: 'Fira Code', monospace;
 }
 
-body, html { margin: 0; background: var(--bg-color); color: white; font-family: 'Inter', sans-serif; overflow: hidden; }
+body, html { 
+    margin: 0; 
+    background: var(--bg-color); 
+    color: white; 
+    font-family: var(--font-main); 
+    overflow: hidden; 
+}
 
-/* Auth */
-#auth-overlay { position: fixed; inset: 0; background: var(--bg-color); display: flex; align-items: center; justify-content: center; z-index: 2000; }
-.auth-box { background: var(--glass); padding: 40px; border-radius: 20px; border: 1px solid var(--border); backdrop-filter: blur(20px); text-align: center; width: 320px; }
-.auth-box input { width: 100%; padding: 12px; margin: 8px 0; background: rgba(0,0,0,0.3); border: 1px solid var(--border); color: white; border-radius: 8px; box-sizing: border-box;}
+/* --- THE GRAPH CANVAS --- */
+#graph {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1;
+}
 
-/* Tabs */
-.workspace-tabs { display: flex; gap: 8px; margin-top: 10px; pointer-events: auto; }
-.tab-btn { background: var(--glass); border: 1px solid var(--border); color: var(--text-dim); padding: 6px 14px; border-radius: 8px; cursor: pointer; font-size: 0.75rem; }
-.tab-btn.active { background: var(--accent); color: white; border-color: white; box-shadow: 0 0 10px rgba(99,102,241,0.4); }
+/* --- UI LAYER & OVERLAYS --- */
+#ui-layer {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 100;
+    padding: 30px;
+    pointer-events: none; /* Allows graph interaction through empty space */
+}
 
-/* Sidebar & Editor */
-#sidebar { position: fixed; right: 0; top: 0; width: 420px; height: 100vh; background: rgba(10,10,15,0.98); backdrop-filter: blur(30px); border-left: 1px solid var(--border); z-index: 1000; padding: 40px; display: flex; flex-direction: column; transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); }
+/* Re-enable clicking for actual elements */
+header, .controls, .search-container {
+    pointer-events: auto;
+}
+
+header h1 {
+    margin: 0;
+    font-size: 1.2rem;
+    font-weight: 900;
+    letter-spacing: 4px;
+    color: white;
+}
+
+/* --- AUTH OVERLAY --- */
+#auth-overlay { 
+    position: fixed; 
+    inset: 0; 
+    background: var(--bg-color); 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    z-index: 2000; 
+}
+
+.auth-box { 
+    background: var(--glass); 
+    padding: 40px; 
+    border-radius: 20px; 
+    border: 1px solid var(--border); 
+    backdrop-filter: blur(20px); 
+    text-align: center; 
+    width: 320px; 
+}
+
+.auth-box h2 {
+    letter-spacing: 5px;
+    margin-bottom: 5px;
+}
+
+.auth-box input { 
+    width: 100%; 
+    padding: 12px; 
+    margin: 8px 0; 
+    background: rgba(0,0,0,0.3); 
+    border: 1px solid var(--border); 
+    color: white; 
+    border-radius: 8px; 
+    box-sizing: border-box;
+    outline: none;
+}
+
+/* --- BUTTONS & CONTROLS --- */
+.auth-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 15px;
+}
+
+button {
+    font-family: var(--font-main);
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+#login-btn, #addNode, #signup-btn {
+    flex: 1;
+    background: var(--accent);
+    color: white;
+    border: none;
+    padding: 12px;
+    border-radius: 8px;
+    font-weight: 600;
+}
+
+.btn-secondary, #addNode, #toggleLink {
+    background: var(--glass) !important;
+    border: 1px solid var(--border) !important;
+    color: white !important;
+}
+
+#addNode:hover, #toggleLink:hover {
+    background: var(--accent) !important;
+    border-color: white !important;
+}
+
+/* --- TABS --- */
+.workspace-tabs { display: flex; gap: 8px; margin-top: 15px; }
+.tab-btn { 
+    background: var(--glass); 
+    border: 1px solid var(--border); 
+    color: var(--text-dim); 
+    padding: 6px 14px; 
+    border-radius: 8px; 
+    font-size: 0.75rem; 
+}
+.tab-btn.active { 
+    background: var(--accent); 
+    color: white; 
+    border-color: white; 
+    box-shadow: 0 0 15px rgba(99,102,241,0.4); 
+}
+
+/* --- SIDEBAR --- */
+#sidebar { 
+    position: fixed; 
+    right: 0; 
+    top: 0; 
+    width: 420px; 
+    height: 100vh; 
+    background: rgba(10,10,15,0.95); 
+    backdrop-filter: blur(30px); 
+    border-left: 1px solid var(--border); 
+    z-index: 1000; 
+    padding: 40px; 
+    display: flex; 
+    flex-direction: column; 
+    transition: 0.4s cubic-bezier(0.19, 1, 0.22, 1); 
+    box-sizing: border-box;
+}
+
 .sidebar-hidden { transform: translateX(100%); }
-#node-content { flex-grow: 1; background: transparent; border: none; color: #e2e8f0; font-family: 'Fira Code', monospace; font-size: 1rem; line-height: 1.7; outline: none; margin-top: 20px; }
 
-/* Search results */
-#search-results { position: absolute; background: #111; border: 1px solid var(--border); width: 250px; border-radius: 8px; margin-top: 5px; }
-.search-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border); }
-.search-item:hover { background: var(--accent); }
+#node-content { 
+    flex-grow: 1; 
+    background: transparent; 
+    border: none; 
+    color: #e2e8f0; 
+    font-family: var(--font-code); 
+    font-size: 1rem; 
+    line-height: 1.7; 
+    outline: none; 
+    margin-top: 20px; 
+    resize: none;
+}
+
+/* --- SEARCH & UTILS --- */
+.search-container { margin-top: 20px; }
+#node-search {
+    background: var(--glass);
+    border: 1px solid var(--border);
+    color: white;
+    padding: 10px;
+    border-radius: 8px;
+    width: 250px;
+    outline: none;
+}
+
+#search-results { 
+    position: absolute; 
+    background: #111; 
+    border: 1px solid var(--border); 
+    width: 250px; 
+    border-radius: 8px; 
+    margin-top: 5px; 
+}
 
 .hidden { display: none !important; }
