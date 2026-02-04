@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scientia | Knowledge Engine</title>
     <script src="https://unpkg.com/force-graph"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
 </head>
@@ -18,22 +19,43 @@
             <button id="addNode">+ NODE</button>
             <button id="toggleLink">🔗 CONNECT</button>
         </div>
+        <div class="search-container">
+            <input type="text" id="node-search" placeholder="Search nodes...">
+            <div id="search-results" class="hidden"></div>
+        </div>
         <div id="status-bar"></div>
     </div>
 
     <div id="sidebar" class="sidebar-hidden">
         <div class="sidebar-header">
             <h2 id="node-title">Node Title</h2>
-            <button id="close-sidebar">×</button>
+            <div class="sidebar-actions">
+                <button id="edit-toggle">👁 Preview</button>
+                <button id="close-sidebar">×</button>
+            </div>
         </div>
-        <textarea id="node-content" placeholder="Start writing your thoughts..."></textarea>
+
+        <div class="category-selector">
+            <label for="node-category">Folder:</label>
+            <select id="node-category">
+                <option value="General">General</option>
+                <option value="CS">Computer Science</option>
+                <option value="Math">Mathematics</option>
+                <option value="Personal">Personal</option>
+                <option value="Project">Projects</option>
+            </select>
+        </div>
+        
+        <textarea id="node-content" placeholder="Start writing Markdown..."></textarea>
+        <div id="node-preview" class="hidden"></div>
+
         <div class="sidebar-footer">
             <span id="save-status">All changes saved</span>
+            <button id="delete-node" class="btn-danger">🗑 Delete Node</button>
         </div>
     </div>
 
     <div id="graph"></div>
-
     <script type="module" src="main.js"></script>
 </body>
 </html>
