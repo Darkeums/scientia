@@ -9,19 +9,34 @@ async function checkUser() {
     const { data: { user } } = await supabase.auth.getUser();
     if (user) {
         document.getElementById('auth-overlay').classList.add('hidden');
-        loadWorkspace("Personal"); // Default to personal
+        loadWorkspace("Personal"); 
     }
 }
 
+// SIGN IN LOGIC
 document.getElementById('login-btn').onclick = async () => {
-    const { error } = await supabase.auth.signInWithPassword({
-        email: document.getElementById('email').value,
-        password: document.getElementById('password').value
-    });
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    
     if (error) document.getElementById('auth-error').innerText = error.message;
     else checkUser();
 };
 
+// SIGN UP LOGIC (This was missing!)
+document.getElementById('signup-btn').onclick = async () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    const { data, error } = await supabase.auth.signUp({ email, password });
+
+    if (error) {
+        document.getElementById('auth-error').innerText = error.message;
+    } else {
+        document.getElementById('auth-error').innerText = "Success! Now click Sign In.";
+        document.getElementById('auth-error').style.color = "#10b981"; 
+    }
+};
 // --- WORKSPACE LOGIC ---
 async function loadWorkspace(name) {
     const { data } = await supabase.from('workspaces').select('id').eq('name', name).single();
