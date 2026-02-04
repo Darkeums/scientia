@@ -3,14 +3,36 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scientia | Knowledge Engine</title>
-    <script src="https://unpkg.com/force-graph"></script>
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <title>Scientia | Knowledge Graph</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Fira+Code&display=swap" rel="stylesheet">
+    <script src="//unpkg.com/force-graph"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-    <div id="auth-overlay">
+
+    <div id="graph"></div>
+
+    <div id="ui-layer">
+        <header>
+            <h1>SCIENTIA</h1>
+            <div class="workspace-tabs">
+                <button class="tab-btn active" data-ws="Personal">My Vault</button>
+                <button class="tab-btn" data-ws="Shared">Shared Space</button>
+            </div>
+        </header>
+
+        <div class="controls">
+            <button id="addNode">+ NODE</button>
+            <button id="toggleLink">🔗 CONNECT</button>
+        </div>
+
+        <div class="search-container">
+            <input type="text" id="node-search" placeholder="Search nodes...">
+            <div id="search-results" class="hidden"></div>
+        </div>
+    </div>
+
+    <div id="auth-overlay" class="hidden">
         <div class="auth-box">
             <h2>SCIENTIA</h2>
             <p>Enter your private vault</p>
@@ -24,52 +46,34 @@
         </div>
     </div>
 
-    <div id="ui-layer">
-        <header>
-            <h1>SCIENTIA</h1>
-            <div class="workspace-tabs">
-                <button class="tab-btn active" data-ws="Personal">My Vault</button>
-                <button class="tab-btn" data-ws="Shared">Shared Space</button>
-            </div>
-        </header>
-        <div class="controls">
-            <button id="addNode">+ NODE</button>
-            <button id="toggleLink">🔗 CONNECT</button>
-        </div>
-        <div class="search-container">
-            <input type="text" id="node-search" placeholder="Search nodes...">
-            <div id="search-results" class="hidden"></div>
-        </div>
-    </div>
-
     <div id="sidebar" class="sidebar-hidden">
         <div class="sidebar-header">
             <h2 id="node-title">Topic</h2>
             <div class="sidebar-actions">
-                <button id="edit-toggle" class="btn-toggle">👁 Preview</button>
-                <button id="close-sidebar" class="btn-close">×</button>
+                <button id="edit-toggle">👁 Preview</button>
+                <button id="close-sidebar">✕</button>
             </div>
         </div>
-        <div class="category-selector">
-            <span>Folder</span>
+
+        <div class="meta-row">
+            <label>Folder</label>
             <select id="node-category">
                 <option value="General">General</option>
-                <option value="CS">Computer Science</option>
-                <option value="Math">Mathematics</option>
+                <option value="CS">CS</option>
+                <option value="Math">Math</option>
                 <option value="Personal">Personal</option>
             </select>
         </div>
-        <div class="editor-container">
-            <textarea id="node-content" placeholder="Markdown supported..."></textarea>
-            <div id="node-preview" class="hidden"></div>
-        </div>
+
+        <textarea id="node-content" placeholder="Markdown supported..."></textarea>
+        <div id="node-preview" class="hidden"></div>
+
         <div class="sidebar-footer">
-            <div id="save-status">All changes saved</div>
+            <span id="save-status">All changes saved</span>
             <button id="delete-node" class="btn-danger">🗑 Delete Node</button>
         </div>
     </div>
 
-    <div id="graph"></div>
     <script type="module" src="main.js"></script>
 </body>
 </html>
