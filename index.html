@@ -2,6 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Scientia | Knowledge Engine</title>
     <link rel="stylesheet" href="style.css">
     <script src="//unpkg.com/force-graph"></script>
@@ -17,6 +18,7 @@
                 <button class="tab-btn" data-ws="Shared">Shared Space</button>
             </div>
         </header>
+
         <div class="controls">
             <button id="addNode">+ NODE</button>
             <button id="toggleLink">🔗 CONNECT</button>
@@ -28,10 +30,31 @@
             <h2 id="node-title">Topic</h2>
             <button id="close-sidebar">✕</button>
         </div>
-        <textarea id="node-content" placeholder="Start typing your notes..."></textarea>
+        
+        <div class="meta-row">
+            <label>Folder</label>
+            <select id="node-category">
+                <option value="General">General</option>
+                <option value="CS">CS</option>
+                <option value="Math">Math</option>
+                <option value="Personal">Personal</option>
+            </select>
+        </div>
+
+        <textarea id="node-content" placeholder="Start typing your notes here..."></textarea>
+        
         <div class="side-foot">
-            <span id="save-status">Saved</span>
+            <span id="save-status">All changes saved</span>
             <button id="delete-node">🗑 Delete</button>
+        </div>
+    </div>
+
+    <div id="auth-overlay" class="hidden">
+        <div class="auth-box">
+            <h2>SCIENTIA</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button id="login-btn">Sign In</button>
         </div>
     </div>
 
