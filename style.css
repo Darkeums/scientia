@@ -3,28 +3,49 @@
     --accent: #6366f1;
     --glass: rgba(255, 255, 255, 0.05);
     --border: rgba(255, 255, 255, 0.1);
+    --text-main: #e2e8f0;
+    --text-dim: #94a3b8;
 }
 
 body, html { margin: 0; padding: 0; background: var(--bg-color); font-family: 'Inter', sans-serif; color: white; overflow: hidden; }
 
+/* UI Layer */
 #ui-layer { position: absolute; top: 30px; left: 30px; z-index: 100; pointer-events: none; }
 .controls, .search-container { pointer-events: auto; }
+#node-search { width: 250px; background: var(--glass); border: 1px solid var(--border); padding: 12px; border-radius: 12px; color: white; margin-top: 15px; outline: none; backdrop-filter: blur(10px); transition: 0.3s; }
+#node-search:focus { border-color: var(--accent); box-shadow: 0 0 10px rgba(99, 102, 241, 0.3); }
 
-/* Search Styles */
-#node-search { width: 250px; background: var(--glass); border: 1px solid var(--border); padding: 10px; border-radius: 8px; color: white; margin-top: 15px; outline: none; }
-#search-results { position: absolute; background: rgba(15, 15, 25, 0.98); border: 1px solid var(--border); width: 250px; border-radius: 8px; max-height: 200px; overflow-y: auto; }
-.search-item { padding: 10px; cursor: pointer; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
-.search-item:hover { background: var(--accent); }
-
-/* Sidebar & Markdown */
-#sidebar { position: fixed; right: 0; top: 0; width: 380px; height: 100vh; background: rgba(10, 10, 15, 0.95); backdrop-filter: blur(20px); border-left: 1px solid var(--border); transition: transform 0.4s ease; z-index: 1000; padding: 30px; display: flex; flex-direction: column; }
+/* Sidebar Design */
+#sidebar { 
+    position: fixed; right: 0; top: 0; width: 420px; height: 100vh; 
+    background: rgba(10, 10, 15, 0.98); backdrop-filter: blur(30px); 
+    border-left: 1px solid var(--border); transition: transform 0.5s cubic-bezier(0.19, 1, 0.22, 1); 
+    z-index: 1000; padding: 40px; display: flex; flex-direction: column; 
+}
 .sidebar-hidden { transform: translateX(100%); }
-#node-content, #node-preview { flex-grow: 1; margin-top: 20px; overflow-y: auto; line-height: 1.6; }
-#node-preview h1 { color: var(--accent); font-size: 1.4rem; }
-#node-preview code { background: rgba(255,255,255,0.1); padding: 2px 4px; border-radius: 4px; }
 
-.category-selector { margin-top: 15px; font-size: 0.8rem; display: flex; gap: 10px; align-items: center; }
-#node-category { background: var(--glass); border: 1px solid var(--border); color: white; padding: 5px; border-radius: 4px; }
+.sidebar-header h2 { margin: 0; font-size: 1.8rem; font-weight: 900; color: white; }
+.category-selector { margin-top: 10px; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-dim); display: flex; align-items: center; gap: 8px; }
+#node-category { background: transparent; border: none; color: var(--accent); font-weight: 600; cursor: pointer; }
 
-.btn-danger { background: rgba(239, 68, 68, 0.1); color: #ef4444; border: 1px solid #ef4444; width: 100%; padding: 10px; border-radius: 8px; cursor: pointer; margin-top: 10px; }
+/* The Notepad Upgrade */
+.editor-container { flex-grow: 1; margin-top: 30px; display: flex; flex-direction: column; }
+#node-content { 
+    flex-grow: 1; background: transparent; border: none; color: var(--text-main); 
+    font-family: 'Fira Code', monospace; font-size: 1rem; line-height: 1.7; 
+    resize: none; outline: none; 
+}
+#node-preview { 
+    flex-grow: 1; overflow-y: auto; color: var(--text-main); line-height: 1.6; 
+}
+#node-preview h1 { border-bottom: 1px solid var(--border); padding-bottom: 10px; color: var(--accent); }
+#node-preview code { background: var(--glass); padding: 3px 6px; border-radius: 4px; font-family: 'Fira Code'; font-size: 0.9em; }
+
+/* Buttons */
+.btn-toggle { background: var(--accent); border: none; font-size: 0.75rem; padding: 6px 12px; border-radius: 6px; font-weight: bold; }
+.btn-close { background: none; border: none; color: var(--text-dim); font-size: 2rem; cursor: pointer; }
+.btn-danger { background: rgba(239, 68, 68, 0.05); color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2); padding: 12px; border-radius: 12px; margin-top: 20px; font-weight: 600; cursor: pointer; transition: 0.2s; }
+.btn-danger:hover { background: #ef4444; color: white; }
+
+#save-status { font-size: 0.7rem; color: var(--text-dim); font-family: monospace; text-align: center; }
 .hidden { display: none; }

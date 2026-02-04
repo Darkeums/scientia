@@ -7,7 +7,7 @@
     <script src="https://unpkg.com/force-graph"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Fira+Code&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="ui-layer">
@@ -28,15 +28,15 @@
 
     <div id="sidebar" class="sidebar-hidden">
         <div class="sidebar-header">
-            <h2 id="node-title">Node Title</h2>
+            <h2 id="node-title">Topic</h2>
             <div class="sidebar-actions">
-                <button id="edit-toggle">👁 Preview</button>
-                <button id="close-sidebar">×</button>
+                <button id="edit-toggle" class="btn-toggle">👁 Preview</button>
+                <button id="close-sidebar" class="btn-close">×</button>
             </div>
         </div>
 
         <div class="category-selector">
-            <label for="node-category">Folder:</label>
+            <span>Folder</span>
             <select id="node-category">
                 <option value="General">General</option>
                 <option value="CS">Computer Science</option>
@@ -46,11 +46,13 @@
             </select>
         </div>
         
-        <textarea id="node-content" placeholder="Start writing Markdown..."></textarea>
-        <div id="node-preview" class="hidden"></div>
+        <div class="editor-container">
+            <textarea id="node-content" placeholder="Type your thoughts here (Markdown supported)..."></textarea>
+            <div id="node-preview" class="hidden"></div>
+        </div>
 
         <div class="sidebar-footer">
-            <span id="save-status">All changes saved</span>
+            <div id="save-status">All changes saved</div>
             <button id="delete-node" class="btn-danger">🗑 Delete Node</button>
         </div>
     </div>
