@@ -4,165 +4,49 @@
     --glass: rgba(255, 255, 255, 0.03);
     --border: rgba(255, 255, 255, 0.08);
     --text: #e2e8f0;
-    --text-dim: #94a3b8;
 }
 
-body, html { 
-    margin: 0; 
-    background: var(--bg); 
-    color: var(--text); 
-    font-family: 'Inter', sans-serif; 
-    overflow: hidden; 
-}
+body, html { margin: 0; background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; overflow: hidden; }
 
-/* --- THE GRAPH --- */
-#graph {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    z-index: 1;
-}
+#graph { position: fixed; inset: 0; z-index: 1; }
 
-/* --- UI LAYER --- */
-#ui-layer {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    z-index: 100;
-    padding: 40px;
-    pointer-events: none; /* Crucial: allows clicking graph behind UI */
-}
-
+#ui-layer { position: fixed; inset: 0; z-index: 100; padding: 40px; pointer-events: none; }
 header, .controls, .search-container { pointer-events: auto; }
 
-h1 { 
-    letter-spacing: 5px; 
-    font-weight: 900; 
-    margin: 0; 
-    font-size: 1.2rem; 
-    text-shadow: 0 0 20px rgba(99, 102, 241, 0.5);
-}
+h1 { letter-spacing: 5px; font-weight: 900; margin: 0; font-size: 1.2rem; text-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
 
-/* --- BUTTONS & TABS --- */
 button, select, input {
-    background: var(--glass);
-    border: 1px solid var(--border);
-    color: white;
-    padding: 10px 18px;
-    border-radius: 12px;
-    backdrop-filter: blur(10px);
-    cursor: pointer;
-    font-size: 0.8rem;
-    transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    background: var(--glass); border: 1px solid var(--border); color: white;
+    padding: 10px 18px; border-radius: 12px; backdrop-filter: blur(10px);
+    cursor: pointer; font-size: 0.8rem; transition: 0.3s;
 }
 
-button:hover {
-    background: var(--accent);
-    border-color: white;
-    box-shadow: 0 0 20px rgba(99, 102, 241, 0.4);
-    transform: translateY(-1px);
-}
+button:hover { background: var(--accent); box-shadow: 0 0 20px rgba(99, 102, 241, 0.4); }
 
 .workspace-tabs { display: flex; gap: 10px; margin-top: 15px; }
-
-.tab-btn.active { 
-    background: var(--accent); 
-    border-color: rgba(255,255,255,0.5); 
-}
-
+.tab-btn.active { background: var(--accent); border-color: rgba(255,255,255,0.5); }
 .controls { display: flex; gap: 12px; margin-top: 25px; }
 
-/* --- SIDEBAR --- */
 #sidebar {
-    position: fixed;
-    right: 0;
-    top: 0;
-    width: 450px;
-    height: 100vh;
-    background: rgba(8, 8, 12, 0.85);
-    backdrop-filter: blur(40px);
-    border-left: 1px solid var(--border);
-    padding: 50px;
-    display: flex;
-    flex-direction: column;
-    z-index: 1000;
-    transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1);
-    box-sizing: border-box;
+    position: fixed; right: 0; top: 0; width: 450px; height: 100vh;
+    background: rgba(8, 8, 12, 0.85); backdrop-filter: blur(40px);
+    border-left: 1px solid var(--border); padding: 50px;
+    display: flex; flex-direction: column; z-index: 1000;
+    transition: 0.5s cubic-bezier(0.16, 1, 0.3, 1); box-sizing: border-box;
 }
-
 .sidebar-hidden { transform: translateX(100%); }
 
-.sidebar-header { 
-    display: flex; 
-    justify-content: space-between; 
-    align-items: flex-start; 
-    margin-bottom: 30px;
-}
-
-#node-title { font-size: 2.2rem; margin: 0; letter-spacing: -1px; font-weight: 800; }
-
-.meta-row { display: flex; align-items: center; gap: 15px; margin-bottom: 20px; color: var(--text-dim); }
-
+#node-title { font-size: 2.2rem; margin: 0 0 20px 0; font-weight: 800; }
 #node-content {
-    background: transparent;
-    border: none;
-    color: var(--text);
-    font-family: 'Fira Code', monospace;
-    font-size: 1.05rem;
-    line-height: 1.8;
-    resize: none;
-    flex-grow: 1;
-    outline: none;
-    padding: 10px 0;
+    background: transparent; border: none; color: var(--text);
+    font-family: 'Fira Code', monospace; font-size: 1rem; line-height: 1.8;
+    flex-grow: 1; outline: none; resize: none;
 }
 
-#node-preview {
-    flex-grow: 1;
-    overflow-y: auto;
-    line-height: 1.6;
-}
-
-.sidebar-footer {
-    margin-top: 20px;
-    padding-top: 25px;
-    border-top: 1px solid var(--border);
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-}
-
-/* --- AUTH OVERLAY --- */
-#auth-overlay {
-    position: fixed;
-    inset: 0;
-    background: var(--bg);
-    z-index: 2000;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.auth-box {
-    background: var(--glass);
-    padding: 50px;
-    border-radius: 24px;
-    border: 1px solid var(--border);
-    text-align: center;
-    width: 350px;
-    backdrop-filter: blur(20px);
-}
-
-.auth-buttons { display: flex; gap: 10px; margin-top: 20px; }
-
-.btn-danger { 
-    background: rgba(239, 68, 68, 0.1) !important; 
-    color: #ef4444 !important; 
-    border-color: rgba(239, 68, 68, 0.2) !important; 
-}
-
+.sidebar-footer { margin-top: 20px; padding-top: 25px; border-top: 1px solid var(--border); display: flex; justify-content: space-between; }
+.btn-danger { background: rgba(239, 68, 68, 0.1) !important; color: #ef4444 !important; }
 .btn-danger:hover { background: #ef4444 !important; color: white !important; }
 
+#auth-overlay { position: fixed; inset: 0; background: var(--bg); z-index: 2000; display: flex; align-items: center; justify-content: center; }
+.auth-box { background: var(--glass); padding: 50px; border-radius: 24px; border: 1px solid var(--border); backdrop-filter: blur(20px); text-align: center; width: 350px; }
 .hidden { display: none !important; }

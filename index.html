@@ -3,13 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scientia | Knowledge Graph</title>
+    <title>Scientia | Knowledge Engine</title>
     <link rel="stylesheet" href="style.css">
     <script src="//unpkg.com/force-graph"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 </head>
 <body>
-
     <div id="graph"></div>
 
     <div id="ui-layer">
@@ -54,7 +53,6 @@
                 <button id="close-sidebar">✕</button>
             </div>
         </div>
-
         <div class="meta-row">
             <label>Folder</label>
             <select id="node-category">
@@ -64,10 +62,8 @@
                 <option value="Personal">Personal</option>
             </select>
         </div>
-
         <textarea id="node-content" placeholder="Markdown supported..."></textarea>
         <div id="node-preview" class="hidden"></div>
-
         <div class="sidebar-footer">
             <span id="save-status">All changes saved</span>
             <button id="delete-node" class="btn-danger">🗑 Delete Node</button>
