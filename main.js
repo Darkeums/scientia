@@ -69,24 +69,21 @@ document.getElementById('signup-btn').onclick = async () => {
 async function loadWorkspace(name) {
     console.log("Loading workspace:", name);
     
-    // Change .single() to .maybeSingle() to stop the crashing
     const { data, error } = await supabase
         .from('workspaces')
         .select('id')
         .eq('name', name)
         .maybeSingle(); 
     
-    if (error) {
-        console.error("Workspace error:", error.message);
-        return;
-    }
-
     if (data) {
         currentWsId = data.id;
         console.log("Success! Workspace ID:", currentWsId);
+        
+        // --- ADD THIS LINE BELOW ---
+        document.getElementById('auth-overlay').classList.add('hidden'); 
+        // ---------------------------
+
         refreshData();
-    } else {
-        console.log("No workspace found yet. RLS might be blocking or row is missing.");
     }
 }
 
