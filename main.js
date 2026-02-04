@@ -66,22 +66,27 @@ document.getElementById('signup-btn').onclick = async () => {
         document.getElementById('auth-error').style.color = "#10b981"; 
     }
 };
-// --- WORKSPACE LOGIC ---
 async function loadWorkspace(name) {
     console.log("Loading workspace:", name);
-    const { data, error } = await supabase.from('workspaces').select('id').eq('name', name).single();
+    
+    // Change .single() to .maybeSingle() to stop the crashing
+    const { data, error } = await supabase
+        .from('workspaces')
+        .select('id')
+        .eq('name', name)
+        .maybeSingle(); 
     
     if (error) {
         console.error("Workspace error:", error.message);
-        // If this fails, it's because the 'Personal' row doesn't exist in Supabase!
-        if (name === "Personal") alert("Error: Please create a 'Personal' row in your workspaces table in Supabase.");
         return;
     }
 
     if (data) {
         currentWsId = data.id;
-        console.log("Workspace ID set to:", currentWsId);
+        console.log("Success! Workspace ID:", currentWsId);
         refreshData();
+    } else {
+        console.log("No workspace found yet. RLS might be blocking or row is missing.");
     }
 }
 
