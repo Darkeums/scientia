@@ -10,10 +10,27 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;900&family=Fira+Code&display=swap" rel="stylesheet">
 </head>
 <body>
+    <div id="auth-overlay">
+        <div class="auth-box">
+            <h2>SCIENTIA</h2>
+            <p>Enter your private vault</p>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <div class="auth-buttons">
+                <button id="login-btn">Sign In</button>
+                <button id="signup-btn" class="btn-secondary">Sign Up</button>
+            </div>
+            <p id="auth-error"></p>
+        </div>
+    </div>
+
     <div id="ui-layer">
         <header>
             <h1>SCIENTIA</h1>
-            <p class="subtitle">UNIVERSAL KNOWLEDGE ENGINE</p>
+            <div class="workspace-tabs">
+                <button class="tab-btn active" data-ws="Personal">My Vault</button>
+                <button class="tab-btn" data-ws="Shared">Shared Space</button>
+            </div>
         </header>
         <div class="controls">
             <button id="addNode">+ NODE</button>
@@ -23,7 +40,6 @@
             <input type="text" id="node-search" placeholder="Search nodes...">
             <div id="search-results" class="hidden"></div>
         </div>
-        <div id="status-bar"></div>
     </div>
 
     <div id="sidebar" class="sidebar-hidden">
@@ -34,7 +50,6 @@
                 <button id="close-sidebar" class="btn-close">×</button>
             </div>
         </div>
-
         <div class="category-selector">
             <span>Folder</span>
             <select id="node-category">
@@ -42,15 +57,12 @@
                 <option value="CS">Computer Science</option>
                 <option value="Math">Mathematics</option>
                 <option value="Personal">Personal</option>
-                <option value="Project">Projects</option>
             </select>
         </div>
-        
         <div class="editor-container">
-            <textarea id="node-content" placeholder="Type your thoughts here (Markdown supported)..."></textarea>
+            <textarea id="node-content" placeholder="Markdown supported..."></textarea>
             <div id="node-preview" class="hidden"></div>
         </div>
-
         <div class="sidebar-footer">
             <div id="save-status">All changes saved</div>
             <button id="delete-node" class="btn-danger">🗑 Delete Node</button>
