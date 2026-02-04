@@ -41,9 +41,14 @@ Graph.backgroundColor('#050508')
         }
     })
     .onNodeClick(node => {
-        if (linkMode) handleLinkSelection(node);
-        else openSidebar(node);
-    });
+    if (linkMode) {
+        // If we are in link mode, ONLY handle the connection
+        handleLinkSelection(node);
+    } else {
+        // If we are NOT in link mode, open the sidebar
+        openSidebar(node);
+    }
+});
 
 // Physics
 Graph.d3Force('charge').strength(-180);
