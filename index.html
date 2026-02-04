@@ -1,194 +1,63 @@
-import { supabase } from './supabaseClient.js';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientia | Knowledge Engine</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="//unpkg.com/force-graph"></script>
+</head>
+<body>
+    <div id="graph"></div>
 
-// --- 1. INITIALIZATION & STATE ---
-const Graph = ForceGraph()(document.getElementById('graph'));
-let nodes = [], links = [], activeNode = null, currentWsId = null;
-let isConnecting = false, firstNode = null;
+    <div id="ui-layer">
+        <header>
+            <h1>SCIENTIA</h1>
+            <div class="workspace-tabs">
+                <button class="tab-btn active" data-ws="Personal">My Vault</button>
+                <button class="tab-btn" data-ws="Shared">Shared Space</button>
+            </div>
+        </header>
 
-const colors = { 
-    'General': '#6366f1', 
-    'CS': '#3b82f6', 
-    'Math': '#ef4444', 
-    'Personal': '#10b981' 
-};
+        <div class="controls">
+            <button id="addNode">+ NODE</button>
+            <button id="toggleLink">🔗 CONNECT</button>
+        </div>
+    </div>
 
-// --- 2. GRAPH CONFIGURATION (Fixes blandness & invisible threads) ---
-Graph.backgroundColor('#050508')
-    .nodeColor(n => colors[n.category] || '#6366f1')
-    .linkColor(() => 'rgba(255, 255, 255, 0.4)') // Visible threads
-    .linkWidth(2)
-    .linkDirectionalParticles(2)
-    .linkDirectionalParticleSpeed(0.005)
-    .onNodeClick(node => {
-        if (isConnecting) {
-            handleConnection(node);
-        } else {
-            openSidebar(node);
-        }
-    })
-    .nodeCanvasObject((node, ctx, globalScale) => {
-        const color = colors[node.category] || '#6366f1';
-        // Glow effect
-        ctx.shadowBlur = 15;
-        ctx.shadowColor = color;
-        ctx.fillStyle = color;
-        ctx.beginPath(); 
-        ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI); 
-        ctx.fill();
+    <div id="sidebar" class="sidebar-hidden">
+        <div class="side-head">
+            <h2 id="node-title">Topic</h2>
+            <button id="close-sidebar">✕</button>
+        </div>
         
-        // Label styling
-        ctx.shadowBlur = 0;
-        const fontSize = 12/globalScale;
-        ctx.font = `${fontSize}px 'Inter'`;
-        ctx.textAlign = 'center';
-        ctx.fillStyle = 'white';
-        ctx.fillText(node.name, node.x, node.y + 12);
-    });
+        <div class="meta-row">
+            <label>Folder</label>
+            <select id="node-category">
+                <option value="General">General</option>
+                <option value="CS">CS</option>
+                <option value="Math">Math</option>
+                <option value="Personal">Personal</option>
+            </select>
+        </div>
 
-// --- 3. DATA FETCHING & WORKSPACES ---
-async function loadWorkspace(name) {
-    const { data, error } = await supabase
-        .from('workspaces')
-        .select('id')
-        .eq('name', name)
-        .maybeSingle();
-
-    if (data) {
-        currentWsId = data.id;
-        // Update tab UI
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.getAttribute('data-ws') === name);
-        });
-        refreshData();
-    }
-}
-
-async function refreshData() {
-    if (!currentWsId) return;
-
-    const { data: nData } = await supabase.from('nodes').select('*').eq('workspace_id', currentWsId);
-    const { data: lData } = await supabase.from('links').select('*').eq('workspace_id', currentWsId);
-
-    nodes = nData || [];
-    // Map links so the library can read source/target IDs
-    links = lData?.map(l => ({ source: l.source, target: l.target })) || [];
-
-    Graph.graphData({ nodes, links });
-}
-
-// --- 4. CONNECT NODES LOGIC ---
-document.getElementById('toggleLink').onclick = () => {
-    isConnecting = !isConnecting;
-    firstNode = null;
-    const btn = document.getElementById('toggleLink');
-    
-    if (isConnecting) {
-        btn.innerText = "❌ CANCEL";
-        btn.style.background = "#ef4444";
-    } else {
-        btn.innerText = "🔗 CONNECT";
-        btn.style.background = "var(--glass)";
-    }
-};
-
-async function handleConnection(secondNode) {
-    if (!firstNode) {
-        firstNode = secondNode;
-        alert(`Selected ${firstNode.name}. Now click the node to link it to.`);
-    } else {
-        if (firstNode.id === secondNode.id) return;
-
-        const { error } = await supabase.from('links').insert([{ 
-            source: firstNode.id, 
-            target: secondNode.id, 
-            workspace_id: currentWsId 
-        }]);
-
-        if (!error) {
-            isConnecting = false;
-            document.getElementById('toggleLink').innerText = "🔗 CONNECT";
-            document.getElementById('toggleLink').style.background = "var(--glass)";
-            refreshData();
-        }
-    }
-}
-
-// --- 5. NOTEPAD & SIDEBAR LOGIC ---
-async function openSidebar(node) {
-    activeNode = node;
-    document.getElementById('node-title').innerText = node.name;
-    document.getElementById('node-content').value = node.content || "";
-    document.getElementById('node-category').value = node.category || "General";
-    document.getElementById('sidebar').classList.remove('sidebar-hidden');
-}
-
-// Auto-save typing
-document.getElementById('node-content').oninput = () => {
-    if (!activeNode) return;
-    document.getElementById('save-status').innerText = "Saving...";
-    
-    clearTimeout(window.saveTimer);
-    window.saveTimer = setTimeout(async () => {
-        const content = document.getElementById('node-content').value;
-        await supabase.from('nodes').update({ content }).eq('id', activeNode.id);
-        document.getElementById('save-status').innerText = "All changes saved";
-    }, 1000);
-};
-
-// Category dropdown update
-document.getElementById('node-category').onchange = async (e) => {
-    if (!activeNode) return;
-    const category = e.target.value;
-    await supabase.from('nodes').update({ category }).eq('id', activeNode.id);
-    refreshData();
-};
-
-// --- 6. DELETE LOGIC ---
-document.getElementById('delete-node').onclick = async () => {
-    if (!activeNode) return;
-    
-    if (confirm(`Delete "${activeNode.name}" and all its links?`)) {
-        // Delete links first (Foreign Key constraint)
-        await supabase.from('links')
-            .delete()
-            .or(`source.eq.${activeNode.id},target.eq.${activeNode.id}`);
+        <textarea id="node-content" placeholder="Start typing your notes here..."></textarea>
         
-        // Delete node
-        const { error } = await supabase.from('nodes').delete().eq('id', activeNode.id);
-        
-        if (!error) {
-            document.getElementById('sidebar').classList.add('sidebar-hidden');
-            activeNode = null;
-            refreshData();
-        }
-    }
-};
+        <div class="side-foot">
+            <span id="save-status">All changes saved</span>
+            <button id="delete-node">🗑 Delete</button>
+        </div>
+    </div>
 
-// --- 7. GLOBAL CONTROLS ---
-document.getElementById('addNode').onclick = async () => {
-    const name = prompt("Topic name:");
-    if (name && currentWsId) {
-        await supabase.from('nodes').insert([{ 
-            name, 
-            workspace_id: currentWsId, 
-            category: 'General' 
-        }]);
-        refreshData();
-    }
-};
+    <div id="auth-overlay" class="hidden">
+        <div class="auth-box">
+            <h2>SCIENTIA</h2>
+            <input type="email" id="email" placeholder="Email">
+            <input type="password" id="password" placeholder="Password">
+            <button id="login-btn">Sign In</button>
+        </div>
+    </div>
 
-document.getElementById('close-sidebar').onclick = () => {
-    document.getElementById('sidebar').classList.add('sidebar-hidden');
-    activeNode = null;
-};
-
-document.querySelectorAll('.tab-btn').forEach(btn => {
-    btn.onclick = () => loadWorkspace(btn.getAttribute('data-ws'));
-});
-
-window.addEventListener('resize', () => {
-    Graph.width(window.innerWidth).height(window.innerHeight);
-});
-
-// Start the app
-loadWorkspace("Personal");
+    <script type="module" src="main.js"></script>
+</body>
+</html>
