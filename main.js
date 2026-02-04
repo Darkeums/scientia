@@ -42,20 +42,30 @@ async function refreshData() {
 // --- GRAPH CONFIG ---
 Graph.backgroundColor('#050508')
     .nodeColor(n => colors[n.category] || '#6366f1')
-    .onNodeClick(node => {
-        if (isConnecting) handleConnection(node);
-        else openSidebar(node);
-    })
+    .linkColor(() => 'rgba(255, 255, 255, 0.3)') // Semi-transparent white threads
+    .linkWidth(1.5)
+    .linkDirectionalParticles(2) // Flowing dots show the "connection"
+    .linkDirectionalParticleSpeed(0.005)
     .nodeCanvasObject((node, ctx, globalScale) => {
-        const label = node.name;
+        const color = colors[node.category] || '#6366f1';
+        
+        // Node Glow
+        ctx.shadowBlur = 15;
+        ctx.shadowColor = color;
+        ctx.fillStyle = color;
+        
+        ctx.beginPath(); 
+        ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI); 
+        ctx.fill();
+        
+        // Label Styling
+        ctx.shadowBlur = 0;
         const fontSize = 12/globalScale;
-        ctx.font = `${fontSize}px Inter`;
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillStyle = 'white';
-        ctx.fillText(label, node.x, node.y + 10);
-        ctx.fillStyle = colors[node.category] || '#6366f1';
-        ctx.beginPath(); ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI); ctx.fill();
+        ctx.font = `600 ${fontSize}px 'Inter'`;
+        ctx.textAlign = 'center';
+        ctx.fillStyle = 'rgba(255,255,255,0.8)';
+        ctx.fillText(node.name, node.x, node.y + 12);
     });
-
 // --- ACTIONS ---
 document.getElementById('addNode').onclick = async () => {
     const name = prompt("Topic:");
