@@ -6,12 +6,41 @@ const categoryColors = { 'General': '#6366f1', 'CS': '#3b82f6', 'Math': '#ef4444
 
 // --- AUTH ---
 async function checkUser() {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (user) {
+    // 1. Use getSession instead of getUser for faster/more reliable local check
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (session?.user) {
+        console.log("Session found for:", session.user.email);
         document.getElementById('auth-overlay').classList.add('hidden');
+        
+        // 2. Ensure we load the workspace ONLY after we're sure we have a user
         loadWorkspace("Personal"); 
+    } else {
+        console.log("No active session.");
+        document.getElementById('auth-overlay').classList.remove('hidden');
     }
 }
+
+document.getElementById('login-btn').onclick = async () => {
+    const email = document.getElementById('email').value;
+    const password = document.getElementById('password').value;
+    
+    // Provide visual feedback
+    document.getElementById('auth-error').innerText = "Signing in...";
+    document.getElementById('auth-error').style.color = "white";
+
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    
+    if (error) {
+        document.getElementById('auth-error').innerText = error.message;
+        document.getElementById('auth-error').style.color = "#ef4444";
+    } else {
+        console.log("Login successful!");
+        // 3. Instead of just calling checkUser, let's trigger the UI change directly
+        document.getElementById('auth-overlay').classList.add('hidden');
+        await loadWorkspace("Personal");
+    }
+};
 
 // SIGN IN LOGIC
 document.getElementById('login-btn').onclick = async () => {
@@ -39,9 +68,19 @@ document.getElementById('signup-btn').onclick = async () => {
 };
 // --- WORKSPACE LOGIC ---
 async function loadWorkspace(name) {
-    const { data } = await supabase.from('workspaces').select('id').eq('name', name).single();
+    console.log("Loading workspace:", name);
+    const { data, error } = await supabase.from('workspaces').select('id').eq('name', name).single();
+    
+    if (error) {
+        console.error("Workspace error:", error.message);
+        // If this fails, it's because the 'Personal' row doesn't exist in Supabase!
+        if (name === "Personal") alert("Error: Please create a 'Personal' row in your workspaces table in Supabase.");
+        return;
+    }
+
     if (data) {
         currentWsId = data.id;
+        console.log("Workspace ID set to:", currentWsId);
         refreshData();
     }
 }
