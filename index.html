@@ -3,26 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scientia | Knowledge OS</title>
+    <title>Scientia | Knowledge Engine</title>
     <script src="https://unpkg.com/force-graph"></script>
     <link rel="stylesheet" href="style.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;900&display=swap" rel="stylesheet">
 </head>
 <body>
     <div id="ui-layer">
         <header>
             <h1>SCIENTIA</h1>
-            <p class="subtitle">UNIVERSAL KNOWLEDGE GRAPH</p>
+            <p class="subtitle">UNIVERSAL KNOWLEDGE ENGINE</p>
         </header>
-        
         <div class="controls">
-            <button id="addNode" class="btn-primary">+ NEW NODE</button>
+            <button id="addNode" class="btn-primary">+ NODE</button>
             <button id="toggleLink" class="btn-secondary">🔗 CONNECT</button>
         </div>
-        
         <div id="status-bar"></div>
+    </div>
+
+    <div id="sidebar" class="sidebar-hidden">
+        <div class="sidebar-header">
+            <h2 id="node-title">Node Title</h2>
+            <button id="close-sidebar">×</button>
+        </div>
+        <textarea id="node-content" placeholder="Start writing your thoughts..."></textarea>
+        <div class="sidebar-footer">
+            <span id="save-status">All changes saved</span>
+        </div>
     </div>
 
     <div id="graph"></div>

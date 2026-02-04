@@ -7,106 +7,90 @@ let nodes = [];
 let links = [];
 let linkMode = false;
 let sourceNode = null;
+let activeNode = null;
 
-// Obsidian-style Physics & Visuals
+// UI Elements
+const sidebar = document.getElementById('sidebar');
+const nodeTitle = document.getElementById('node-title');
+const nodeContent = document.getElementById('node-content');
+const saveStatus = document.getElementById('save-status');
+
+// Configuration
 Graph.backgroundColor('#050508')
-    .nodeRelSize(5)
-    .nodeId('id')
-    .nodeLabel('name')
-    .nodeColor(n => n.id === sourceNode?.id ? '#ffffff' : '#6366f1')
-    .linkColor(() => 'rgba(255, 255, 255, 0.08)')
-    .linkDirectionalParticles(2)
-    .linkDirectionalParticleSpeed(0.005)
-    .linkDirectionalParticleWidth(1.2)
+    .nodeRelSize(6)
+    .nodeCanvasObject((node, ctx, globalScale) => {
+        const label = node.name;
+        const fontSize = 12/globalScale;
+        
+        // NEON BLOOM EFFECT
+        ctx.shadowColor = node.color || '#6366f1';
+        ctx.shadowBlur = 15;
+        ctx.fillStyle = node.color || '#6366f1';
+        
+        ctx.beginPath();
+        ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI, false);
+        ctx.fill();
+        
+        // Label logic
+        if (globalScale > 2.5) {
+            ctx.shadowBlur = 0;
+            ctx.font = `${fontSize}px Inter`;
+            ctx.textAlign = 'center';
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+            ctx.fillText(label, node.x, node.y + 12);
+        }
+    })
     .onNodeClick(node => {
         if (linkMode) handleLinkSelection(node);
+        else openSidebar(node);
     });
 
-// Tweak Forces (The "Obsidian Spread")
-Graph.d3Force('charge').strength(-150);
-Graph.d3Force('link').distance(60);
+// Physics
+Graph.d3Force('charge').strength(-180);
+
+// Sidebar & Note Logic
+async function openSidebar(node) {
+    activeNode = node;
+    nodeTitle.innerText = node.name;
+    
+    const { data } = await supabase.from('nodes').select('content').eq('id', node.id).single();
+    nodeContent.value = data?.content || "";
+    sidebar.classList.remove('sidebar-hidden');
+}
+
+// Auto-save with Debouncing
+let saveTimeout;
+nodeContent.oninput = () => {
+    saveStatus.innerText = "Saving...";
+    clearTimeout(saveTimeout);
+    saveTimeout = setTimeout(async () => {
+        await supabase.from('nodes').update({ content: nodeContent.value }).eq('id', activeNode.id);
+        saveStatus.innerText = "All changes saved";
+    }, 1000); 
+};
+
+document.getElementById('close-sidebar').onclick = () => sidebar.classList.add('sidebar-hidden');
 
 async function refreshData() {
     const { data: n } = await supabase.from('nodes').select('*');
     const { data: l } = await supabase.from('links').select('*');
-    
     nodes = n || [];
     links = l?.map(link => ({ source: link.source, target: link.target })) || [];
-    
     Graph.graphData({ nodes, links });
 }
 
-async function handleLinkSelection(node) {
-    if (!sourceNode) {
-        sourceNode = node;
-        updateStatus(`Source: ${node.name} | Select Target...`);
-    } else {
-        if (sourceNode.id === node.id) return resetLinkMode();
-
-        const { error } = await supabase.from('links').insert([
-            { source: sourceNode.id, target: node.id }
-        ]);
-
-        if (!error) {
-            await refreshData();
-            resetLinkMode();
-        }
-    }
-}
-
-function resetLinkMode() {
-    sourceNode = null;
-    linkMode = false;
-    updateStatus('');
-    document.getElementById('toggleLink').classList.remove('active');
-}
-
-function updateStatus(msg) {
-    document.getElementById('status-bar').innerText = msg;
-}
-
-// UI Event Listeners
+// Controls
 document.getElementById('addNode').onclick = async () => {
-    const name = prompt("Enter Node Topic:");
+    const name = prompt("Topic name:");
     if (name) {
-        const { error } = await supabase.from('nodes').insert([{ name }]);
-        if (!error) refreshData();
+        await supabase.from('nodes').insert([{ name }]);
+        refreshData();
     }
 };
 
 document.getElementById('toggleLink').onclick = (e) => {
     linkMode = !linkMode;
-    sourceNode = null;
     e.target.classList.toggle('active', linkMode);
-    updateStatus(linkMode ? 'LINK MODE ACTIVE: Select source node' : '');
 };
-// Add this inside your Graph configuration in main.js
-Graph.onNodeHover(node => {
-    graphElement.style.cursor = node ? 'pointer' : null;
-})
-.nodeCanvasObject((node, ctx, globalScale) => {
-    const label = node.name;
-    const fontSize = 14/globalScale;
-    ctx.font = `${fontSize}px Inter`;
-    
-    // Draw Glow
-    ctx.shadowBlur = 15;
-    ctx.shadowColor = node.color || '#6366f1';
-    
-    // Draw Node
-    ctx.fillStyle = node.color || '#6366f1';
-    ctx.beginPath();
-    ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI, false);
-    ctx.fill();
 
-    // Text Label
-    if (globalScale > 2.5) {
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillStyle = 'white';
-        ctx.fillText(label, node.x, node.y + 12);
-    }
-});
-
-// Initial Load
 refreshData();
