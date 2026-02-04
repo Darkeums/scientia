@@ -1,33 +1,40 @@
-<div id="graph"></div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Scientia | Knowledge Engine</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="//unpkg.com/force-graph"></script>
+</head>
+<body>
+    <div id="graph"></div>
 
-<div id="ui-layer">
-    <header>
-        <h1>SCIENTIA</h1>
-        <div class="workspace-tabs">
-            <button class="tab-btn active" data-ws="Personal">My Vault</button>
-            <button class="tab-btn" data-ws="Shared">Shared Space</button>
+    <div id="ui-layer">
+        <header>
+            <h1>SCIENTIA</h1>
+            <div class="workspace-tabs">
+                <button class="tab-btn active" data-ws="Personal">My Vault</button>
+                <button class="tab-btn" data-ws="Shared">Shared Space</button>
+            </div>
+        </header>
+        <div class="controls">
+            <button id="addNode">+ NODE</button>
+            <button id="toggleLink">🔗 CONNECT</button>
         </div>
-    </header>
-    <div class="controls">
-        <button id="addNode">+ NODE</button>
-        <button id="toggleLink">🔗 CONNECT</button>
     </div>
-</div>
 
-<div id="sidebar" class="sidebar-hidden">
-    <div style="display:flex; justify-content: space-between; align-items: center;">
-        <h2 id="node-title" style="margin:0;">Topic</h2>
-        <button id="close-sidebar">✕</button>
+    <div id="sidebar" class="sidebar-hidden">
+        <div class="side-head">
+            <h2 id="node-title">Topic</h2>
+            <button id="close-sidebar">✕</button>
+        </div>
+        <textarea id="node-content" placeholder="Start typing your notes..."></textarea>
+        <div class="side-foot">
+            <span id="save-status">Saved</span>
+            <button id="delete-node">🗑 Delete</button>
+        </div>
     </div>
-    <select id="node-category" style="margin-top:20px;">
-        <option value="General">General</option>
-        <option value="CS">CS</option>
-        <option value="Math">Math</option>
-    </select>
-    <textarea id="node-content" placeholder="Type notes here..."></textarea>
-    <div id="save-status" style="font-size:0.7rem; color:gray; margin-top:10px;">Saved</div>
-    <button id="delete-node" style="margin-top:20px; background:rgba(239,68,68,0.2); color:#ef4444; border-color:rgba(239,68,68,0.2);">🗑 Delete</button>
-</div>
 
-<div id="auth-overlay" class="hidden">
-    </div>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

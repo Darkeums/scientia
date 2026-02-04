@@ -1,53 +1,37 @@
 import { supabase } from './supabaseClient.js';
 
 const Graph = ForceGraph()(document.getElementById('graph'));
-let nodes = [], links = [], activeNode = null, currentWsId = null;
+let activeNode = null;
 
-// --- GRAPH SETUP (FIXES INVISIBLE THREADS) ---
+// Graph Config: Visible Link Threads
 Graph.backgroundColor('#050508')
-    .nodeColor(n => n.category === 'CS' ? '#3b82f6' : '#6366f1')
-    .linkColor(() => 'rgba(255, 255, 255, 0.3)') // Visible threads
-    .linkWidth(1.5)
+    .nodeColor(() => '#6366f1')
+    .linkColor(() => 'rgba(255, 255, 255, 0.4)') // Light threads
+    .linkWidth(2)
     .linkDirectionalParticles(2)
-    .onNodeClick(node => openSidebar(node))
-    .nodeCanvasObject((node, ctx, globalScale) => {
-        const color = '#6366f1';
-        ctx.shadowBlur = 15; ctx.shadowColor = color; ctx.fillStyle = color;
-        ctx.beginPath(); ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI); ctx.fill();
-        ctx.shadowBlur = 0;
-        ctx.font = `${12/globalScale}px Inter`; ctx.textAlign = 'center'; ctx.fillStyle = 'white';
-        ctx.fillText(node.name, node.x, node.y + 12);
-    });
+    .onNodeClick(node => openSidebar(node));
 
-// --- NOTEPAD FUNCTIONALITY ---
 async function openSidebar(node) {
     activeNode = node;
     document.getElementById('node-title').innerText = node.name;
     document.getElementById('node-content').value = node.content || "";
-    document.getElementById('node-category').value = node.category || "General";
     document.getElementById('sidebar').classList.remove('sidebar-hidden');
 }
 
-// Auto-save logic for the notepad
+// Notepad Auto-save Logic
 document.getElementById('node-content').oninput = () => {
     if (!activeNode) return;
     document.getElementById('save-status').innerText = "Typing...";
     
     clearTimeout(window.saveTimer);
     window.saveTimer = setTimeout(async () => {
-        const content = document.getElementById('node-content').value;
-        const { error } = await supabase.from('nodes')
-            .update({ content: content })
+        await supabase.from('nodes')
+            .update({ content: document.getElementById('node-content').value })
             .eq('id', activeNode.id);
-        
-        if (!error) document.getElementById('save-status').innerText = "All changes saved";
-    }, 1000);
+        document.getElementById('save-status').innerText = "All changes saved";
+    }, 800);
 };
 
-// Close Sidebar
 document.getElementById('close-sidebar').onclick = () => {
     document.getElementById('sidebar').classList.add('sidebar-hidden');
-    activeNode = null;
 };
-
-// ... (Rest of your refreshData and loadWorkspace functions)
